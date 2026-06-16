@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerador SEO/GEO para Jornalismo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #f7f5f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .kicker {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #555;
+      margin-top: 0.5rem;
+    }
+
+    .input-section {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 1rem;
+      font-family: 'Georgia', serif;
+      font-size: 15px;
+      line-height: 1.7;
+      border: 1px solid #ccc;
+      background: #fff;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { border-color: #1a1a1a; }
+
+    .word-count {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #999;
+      text-align: right;
+      margin-top: 0.4rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    button {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1.5rem;
+      border: 1.5px solid #1a1a1a;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    #btn-generate {
+      background: #1a1a1a;
+      color: #f7f5f0;
+      flex: 1;
+    }
+
+    #btn-generate:hover:not(:disabled) { background: #333; }
+    #btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #btn-clear {
+      background: transparent;
+      color: #1a1a1a;
+    }
+
+    #btn-clear:hover { background: #eee; }
+
+    .progress-wrap {
+      display: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-label {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      height: 2px;
+      background: #ddd;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #1a1a1a;
+      transition: width 0.4s ease;
+    }
+
+    #results { display: none; }
+
+    .results-header {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #999;
+      border-top: 1px solid #ccc;
+      padding-top: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-label {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #333;
+      font-weight: 700;
+    }
+
+    .card-hint {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: #aaa;
+    }
+
+    .card-value {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #1a1a1a;
+    }
+
+    .copy-btn {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid #ccc;
+      background: transparent;
+      color: #666;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .copy-btn:hover { border-color: #1a1a1a; color: #1a1a1a; }
+    .copy-btn.copied { border-color: #2a7a2a; color: #2a7a2a; }
+
+    .error-msg {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #a00;
+      padding: 1rem;
+      border: 1px solid #f0c0c0;
+      background: #fff8f8;
+    }
+
+    footer {
+      margin-top: 3rem;
+      border-top: 1px solid #ddd;
+      padding-top: 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <p class="kicker">Faculdade Cásper Líbero — Pós-graduação</p>
+      <h1>Gerador SEO/GEO<br>para jornalismo</h1>
+      <p class="subtitle">Cole um texto e gere título, resumo, metadescrição,<br>palavras-chave, tags e perguntas para IAs.</p>
+    </header>
+
+    <div class="input-section">
+      <label for="input-text">Texto jornalístico</label>
+      <textarea id="input-text" placeholder="Cole aqui o texto da matéria..."></textarea>
+      <p class="word-count" id="word-count">0 palavras</p>
+    </div>
+
+    <div class="actions">
+      <button id="btn-generate" onclick="generate()">Gerar metadados →</button>
+      <button id="btn-clear" onclick="clearAll()">Limpar</button>
+    </div>
+
+    <div class="progress-wrap" id="progress-wrap">
+      <p class="progress-label" id="progress-label">Analisando texto...</p>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <div id="results"></div>
+
+    <footer>
+      Gerado com assistência de IA (Claude, Anthropic) &mdash; revise antes de publicar.
+    </footer>
+
+  </div>
+
+  <script>
+    const fields = [
+      { key: 'titulo',        label: 'Título SEO',          hint: 'até 60 caracteres' },
+      { key: 'resumo',        label: 'Resumo editorial',    hint: 'lead do texto' },
+      { key: 'metadescricao', label: 'Metadescrição',       hint: 'até 155 caracteres — aparece no Google' },
+      { key: 'palavras_chave',label: 'Palavras-chave',      hint: 'para mecanismos de busca' },
+      { key: 'tags',          label: 'Tags editoriais',     hint: 'para categorização' },
+      { key: 'pergunta_geo',  label: 'Perguntas GEO',       hint: 'frases que IAs respondem com este conteúdo' },
+      { key: 'schema_sugerido',label: 'Schema.org sugerido', hint: 'markup estruturado recomendado' },
+    ];
+
+    document.getElementById('input-text').addEventListener('input', function () {
+      const words = this.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+      document.getElementById('word-count').textContent = words + ' palavra' + (words !== 1 ? 's' : '');
+    });
+
+    function clearAll() {
+      document.getElementById('input-text').value = '';
+      document.getElementById('word-count').textContent = '0 palavras';
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('progress-wrap').style.display = 'none';
+    }
+
+    function copyField(key, btn) {
+      const el = document.getElementById('val-' + key);
+      if (!el) return;
+      navigator.clipboard.writeText(el.textContent).then(() => {
+        btn.textContent = 'Copiado ✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 1800);
+      });
+    }
+
+    function renderResults(data) {
+      const container = document.getElementById('results');
+      container.innerHTML = '<p class="results-header">Metadados gerados</p>';
+      fields.forEach(f => {
+        if (!data[f.key]) return;
+        container.innerHTML += `
+          <div class="card">
+            <div class="card-header">
+              <span class="card-label">${f.label}</span>
+              <span class="card-hint">${f.hint}</span>
+            </div>
+            <p class="card-value" id="val-${f.key}">${data[f.key]}</p>
+            <button class="copy-btn" onclick="copyField('${f.key}', this)">Copiar</button>
+          </div>`;
+      });
+      container.style.display = 'block';
+    }
+
+    async function generate() {
+      const text = document.getElementById('input-text').value.trim();
+      if (text.length < 50) {
+        alert('Cole um texto mais longo para gerar metadados precisos.');
+        return;
+      }
+
+      document.getElementById('btn-generate').disabled = true;
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('progress-wrap').style.display = 'block';
+
+      const steps = [
+        'Analisando texto...',
+        'Identificando temas e entidades...',
+        'Otimizando para GEO...',
+        'Finalizando metadados...',
+      ];
+      let step = 0;
+      const fill = document.getElementById('progress-fill');
+      const label = document.getElementById('progress-label');
+
+      const interval = setInterval(() => {
+        step = Math.min(step + 1, steps.length - 1);
+        label.textContent = steps[step];
+        fill.style.width = ((step + 1) / steps.length * 75) + '%';
+      }, 1200);
+
+      try {
+        // Chama o backend seguro — não a API diretamente
+        const resp = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+
+        clearInterval(interval);
+        fill.style.width = '100%';
+
+        if (!resp.ok) {
+          const err = await resp.json();
+          throw new Error(err.error || 'Erro desconhecido');
+        }
+
+        const data = await resp.json();
+
+        setTimeout(() => {
+          document.getElementById('progress-wrap').style.display = 'none';
+          renderResults(data);
+        }, 400);
+
+      } catch (err) {
+        clearInterval(interval);
+        document.getElementById('progress-wrap').style.display = 'none';
+        const container = document.getElementById('results');
+        container.innerHTML = `<p class="error-msg">Erro: ${err.message}</p>`;
+        container.style.display = 'block';
+      }
+
+      document.getElementById('btn-generate').disabled = false;
+    }
+  </script>
+</body>
+</html>
